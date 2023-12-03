@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import dataclasses
 import re
 
 import aoc
@@ -33,35 +34,36 @@ if args.part == 1:
 
 
 if args.part == 2:
+    @dataclasses.dataclass
+    class Gear:
+        count: int = 0
+        ratio: int = 1
+
     gears = {}
     for y, line in enumerate(aoc.Input().iter()):
         for x, cell in enumerate(line):
             if cell == '*':
-                gears[(x, y)] = [0, 1]
+                gears[(x, y)] = Gear()
 
-    def update(x, y, num):
+    def updategear(x, y, num):
         global gears
-        count, mult = gears.get((x, y), [0, 0])
-        if not mult:
+        if (x, y) not in gears:
             return
-        count += 1
-        mult *= num
-        gears[x, y] = [count, mult]
+        gear = gears[(x, y)]
+        gear.count += 1
+        gear.ratio *= num
                 
     for y, line in enumerate(aoc.Input().iter()):
         for match in re.finditer(r'(\d+)', line):
             num = int(match.group(1))
             startx, endx = match.span(1)
 
-            update(startx - 1, y, num)
-            update(endx, y, num)
+            updategear(startx - 1, y, num)
+            updategear(endx, y, num)
             for x in range(startx - 1, endx + 1):
-                update(x, y - 1, num)
-                update(x, y + 1, num)
+                updategear(x, y - 1, num)
+                updategear(x, y + 1, num)
 
-    sum = 0
-    for count, ratio  in gears.values():
-        if count == 2:
-            sum += ratio
-    print(sum)
+    print(sum((gear.ratio for gear in gears.values() if gear.count == 2)))
+
 # solution: 78236071
