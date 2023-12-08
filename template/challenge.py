@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
 import dataclasses
+import math
+import re
 import sys
 
 import aoc
@@ -9,14 +11,15 @@ args = aoc.argparse()
 
 
 if args.part == 1:
-    pass
-# test:
+    for line in aoc.Input(split=, convert=, groupby=):
+        pass
+    for line in aoc.Input().iter():
+        pass
 # solution:
 
 
 if args.part == 2:
     pass
-# test:
 # solution:
 
 
