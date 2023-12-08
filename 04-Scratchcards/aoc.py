@@ -32,13 +32,9 @@ def argparse():
 
 
 class Input:
-    class NoSplit:
-        pass
-
     def __init__(self, filename=None):
         self.file = open(filename or defaultinput)
-        self.lineconvert = LineConvert(Input.NoSplit, None)
-        self.eof = False
+        self.lineconvert = LineConvert(None, None)
 
     def read(self):
         return self.file.read()
@@ -48,7 +44,7 @@ class Input:
             stripped = line[:-1] if line.endswith('\n') else line
             yield self.lineconvert(stripped)
 
-    def iter(self, *, split=NoSplit, convert=None, groupby=None):
+    def iter(self, *, split=None, convert=None, groupby=None):
         self.lineconvert = LineConvert(split, convert)
         match groupby:
             case None:
@@ -56,21 +52,49 @@ class Input:
             case int():
                 yield from zip(*(iter(self),) * groupby)
             case 'paragraph':
-                while not self.eof:
-                    yield self._paragraph()
+                while True:
+                    paragraph = []
+                    for line in self.file:
+                        stripped = line[:-1] if line.endswith('\n') else line
+                        if not stripped:
+                            break
+                        paragraph.append(self.lineconvert(stripped))
+                    if not paragraph:
+                        return
+                    yield paragraph
+            case _:
+                raise ValueError("bad value for groupby")
 
-    def list(self, *, split=NoSplit, convert=None, groupby=None):
-        if groupby == 'paragraph':
-            return [list(paragraph) for paragraph in self.iter(split=split, convert=convert, groupby=groupby)]
+    def list(self, *, split=None, convert=None, groupby=None):
         return list(self.iter(split=split, convert=convert, groupby=groupby))
 
-    def _paragraph(self):
+    def paragraph(self, *, split=None, convert=None):
+        self.lineconvert = LineConvert(split, convert)
+        paragraph = []
         for line in self.file:
-            if not line.strip():
-                return
             stripped = line[:-1] if line.endswith('\n') else line
+            if not stripped:
+                break
+            paragraph.append(self.lineconvert(stripped))
+        return paragraph
+
+
+class Lines:
+    def __init__(self, file, split, convert, paragraph):
+        self.file = file
+        self.lineconvert = LineConvert(split, convert)
+        self.paragraph = paragraph
+        self.exhausted = False
+
+    def __iter__(self):
+        if self.exhausted:
+            return
+        for line in self.file:
+            stripped = line[:-1] if line.endswith('\n') else line
+            if not stripped and self.paragraph:
+                break
             yield self.lineconvert(stripped)
-        self.eof = True
+        self.exhausted = True
 
 
 class LineConvert:
@@ -88,20 +112,14 @@ class LineConvert:
             items = list(string)
         elif isinstance(self.split, str):
             items = string.split(self.split)
-        elif self.split == Input.NoSplit:
-            items = [string]
         elif self.split is None:
-            items = string.split()
+            items = [string]
         else:
             raise ValueError(f"bad value for split={self.split}")
 
         if self.convert:
-            for i, item in enumerate(items[:]):
-                try:
-                    items[i] = self.convert(item)
-                except Exception:
-                    pass
+            items = [self.convert(item) for item in items]
 
-        if self.split == Input.NoSplit:
+        if self.split is None:
             return items[0]
         return items
