@@ -1,9 +1,5 @@
 #! /usr/bin/env python3
 
-import dataclasses
-import re
-import sys
-
 import aoc
 
 args = aoc.argparse()
@@ -11,11 +7,9 @@ args = aoc.argparse()
 
 if args.part == 1:
     sum = 0
-    for line in aoc.Input().iter():
-        print(line)
+    for line in aoc.Input():
         game, sets = line.split(':')
         num = int(game.split()[1])
-        print(num)
         ok = True
         for set in sets.split(';'):
             for content in set.split(','):
@@ -27,7 +21,6 @@ if args.part == 1:
                     ok = False
                 if color == 'blue' and count > 14:
                     ok = False
-        print(ok)
         if ok:
             sum += num
     print(sum)
@@ -36,7 +29,7 @@ if args.part == 1:
 
 if args.part == 2:
     sum = 0
-    for line in aoc.Input().iter():
+    for line in aoc.Input():
         game, sets = line.split(':')
         num = int(game.split()[1])
         red = green = blue = 0
