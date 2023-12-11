@@ -2,7 +2,6 @@
 
 import dataclasses
 import re
-
 import aoc
 
 args = aoc.argparse()
@@ -10,13 +9,13 @@ args = aoc.argparse()
 
 if args.part == 1:
     parts = set()
-    for y, line in enumerate(aoc.Input().iter()):
+    for y, line in enumerate(aoc.Input()):
         for x, cell in enumerate(line):
             if not cell.isdigit() and cell != '.':
                 parts.add((x, y))
-                
+
     sum = 0
-    for y, line in enumerate(aoc.Input().iter()):
+    for y, line in enumerate(aoc.Input()):
         for match in re.finditer(r'(\d+)', line):
             num = int(match.group(1))
             startx, endx = match.span(1)
@@ -29,7 +28,6 @@ if args.part == 1:
                     sum += num
                     break
     print(sum)
-
 # solution: 533775
 
 
@@ -40,7 +38,7 @@ if args.part == 2:
         ratio: int = 1
 
     gears = {}
-    for y, line in enumerate(aoc.Input().iter()):
+    for y, line in enumerate(aoc.Input()):
         for x, cell in enumerate(line):
             if cell == '*':
                 gears[(x, y)] = Gear()
@@ -52,8 +50,8 @@ if args.part == 2:
         gear = gears[(x, y)]
         gear.count += 1
         gear.ratio *= num
-                
-    for y, line in enumerate(aoc.Input().iter()):
+
+    for y, line in enumerate(aoc.Input()):
         for match in re.finditer(r'(\d+)', line):
             num = int(match.group(1))
             startx, endx = match.span(1)
@@ -65,5 +63,4 @@ if args.part == 2:
                 updategear(x, y + 1, num)
 
     print(sum((gear.ratio for gear in gears.values() if gear.count == 2)))
-
 # solution: 78236071
