@@ -3,12 +3,11 @@ import pathlib
 import re
 
 
-defaultinput = 'input.txt'
-testinput = 'test.txt'
-TEST = False
+defaultinput = None
+TEST = None
 
 
-def argparse():
+def argparse(**kwargs):
     global defaultinput, testinput, TEST
 
     description = "Advent of code 2023"
@@ -20,12 +19,21 @@ def argparse():
                                            formatter_class=argparsemodule.RawDescriptionHelpFormatter)
     parser.add_argument("part", choices=(1, 2), type=int, help="part")
     parser.add_argument("--test", "-t", action='store_true', help="use test input if it exists")
+    for key, value in kwargs.items():
+        parser.add_argument(f'--{key}', help=f"default = {value}", type=type(value), default=value)
     args = parser.parse_args()
     if args.test:
         TEST = True
-        defaultinput = testinput
-    if not pathlib.Path(defaultinput).exists():
-        parser.error(f"missing input file {defaultinput!r}")
+        input = 'test'
+    else:
+        TEST = False
+        input = 'input'
+    for suf in (args.part, ''):
+        defaultinput = pathlib.Path(f'{input}{suf}.txt')
+        if pathlib.Path(defaultinput).exists():
+            break
+    else:
+        parser.error("missing input file")
     if not open(defaultinput).read():
         parser.error(f"empty input file {defaultinput!r}")
     return args
@@ -35,63 +43,68 @@ class Input:
     class NoSplit:
         pass
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, *, split=NoSplit, convert=None, groupby=None):
         self.file = open(filename or defaultinput)
-        self.lineconvert = LineConvert(Input.NoSplit, None)
+        self.split = split
+        self.convert = convert
+        self.groupby = groupby
         self.eof = False
 
     def read(self):
         return self.file.read()
 
+    def nextline(self, emptyisnone=False):
+        try:
+            line = next(self.file)
+        except StopIteration:
+            self.eof = True
+            raise
+        stripped = line[:-1] if line.endswith('\n') else line
+        if stripped:
+            return self.lineconvert(stripped)
+        if emptyisnone:
+            return None
+        return ''
+
     def __iter__(self):
-        for line in self.file:
-            stripped = line[:-1] if line.endswith('\n') else line
-            yield self.lineconvert(stripped)
+        return self
 
-    def iter(self, *, split=NoSplit, convert=None, groupby=None):
-        self.lineconvert = LineConvert(split, convert)
-        match groupby:
+    def __next__(self):
+        if self.eof:
+            raise StopIteration()
+
+        match self.groupby:
             case None:
-                yield from self
+                return self.nextline()
             case int():
-                yield from zip(*(iter(self),) * groupby)
+                return tuple([self.nextline() for _ in range(self.groupby)])
             case 'paragraph':
-                while not self.eof:
-                    yield self._paragraph()
+                return self.paragraph()
 
-    def list(self, *, split=NoSplit, convert=None, groupby=None):
-        if groupby == 'paragraph':
-            return [list(paragraph) for paragraph in self.iter(split=split, convert=convert, groupby=groupby)]
-        return list(self.iter(split=split, convert=convert, groupby=groupby))
-
-    def _paragraph(self):
-        for line in self.file:
-            if not line.strip():
+    def paragraph(self):
+        while not self.eof:
+            try:
+                line = self.nextline(emptyisnone=True)
+            except StopIteration:
                 return
-            stripped = line[:-1] if line.endswith('\n') else line
-            yield self.lineconvert(stripped)
-        self.eof = True
+            if line is None:
+                return
+            yield line
 
-
-class LineConvert:
-    def __init__(self, split, convert):
-        self.split = split
-        self.convert = convert
-
-    def __call__(self, string):
+    def lineconvert(self, line):
         if isinstance(self.split, re.Pattern):
-            if m := self.split.match(string):
+            if m := self.split.match(line):
                 items = m.groups()
             else:
-                items = [string]
+                items = [line]
         elif self.split == '':
-            items = list(string)
+            items = list(line)
         elif isinstance(self.split, str):
-            items = string.split(self.split)
+            items = line.split(self.split)
         elif self.split == Input.NoSplit:
-            items = [string]
+            items = [line]
         elif self.split is None:
-            items = string.split()
+            items = line.split()
         else:
             raise ValueError(f"bad value for split={self.split}")
 
