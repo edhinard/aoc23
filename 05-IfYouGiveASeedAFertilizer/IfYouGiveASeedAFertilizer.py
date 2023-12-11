@@ -1,23 +1,24 @@
 #! /usr/bin/env python3
 
 import math
-import re
-
 import aoc
 
 args = aoc.argparse()
 
 
 if args.part == 1:
-    paragraphs = aoc.Input().iter(groupby='paragraph')
+    input = aoc.Input(split=None, convert=int)
 
     items = dict(
-        seed=list(map(int, next(paragraphs)[0].split(':')[1].split()))
+        seed=list(next(input))[1:]
     )
+    next(input)
 
-    for paragraph in paragraphs:
-        src, dst = paragraph.pop(0).split()[0].split('-')[::2]
-        converttable = [[int(x) for x in line.split()] for line in paragraph]
+    input.groupby = 'paragraph'
+    for paragraph in input:
+        src, dst = next(paragraph)[0].split('-')[::2]
+        converttable = list(paragraph)
+
         def convert(item):
             for dststart, srcstart, length in converttable:
                 if item >= srcstart and item < srcstart + length:
@@ -25,25 +26,25 @@ if args.part == 1:
             return item
         lastlist = items[dst] = [convert(item) for item in items[src]]
     print(min(lastlist))
-
 # solution: 389056265
 
 
 if args.part == 2:
-    paragraphs = aoc.Input().iter(groupby='paragraph')
+    input = aoc.Input(split=None, convert=int)
 
-    seedline = next(paragraphs)[0].split(':')[1].split()
+    seedline = list(next(input))[1:]
     seedranges = sorted([(int(start), int(length)) for start, length in zip(seedline[::2], seedline[1::2])])
     print("                                        seeds")
     for seedstart, ln in seedranges:
         print(f"{' '*29}[{seedstart:10} - {seedstart + ln:10}]")
     print()
+    next(input)
 
+    input.groupby = 'paragraph'
     tables = []
-    for paragraph in paragraphs:
-        src, dst = paragraph.pop(0).split()[0].split('-')[::2]
-        table = sorted([[int(x) for x in line.split()] for line in paragraph])
-        tables.append(table)
+    for paragraph in input:
+        src, dst = next(paragraph)[0].split('-')[::2]
+        tables.append(sorted(list(paragraph)))
 
     print()
     print("         location         <=            seed")
@@ -59,7 +60,7 @@ if args.part == 2:
                     continue
                 if start < dst:
                     length = min(length, dst - start)
-                    #start = start
+                    # start = start
                     break
                 else:  # dst <= start < dst + ln
                     length = min(length, dst + ln - start)
@@ -89,5 +90,4 @@ if args.part == 2:
             start = location + length
     print()
     print(f" {location:10}                <= {seed:10}")
-
 # solution: 137516820
