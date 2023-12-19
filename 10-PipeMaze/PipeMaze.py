@@ -5,85 +5,55 @@ import aoc
 args = aoc.argparse()
 
 
-def cleanup(map):
-    # find the Starting point
-    for y, line in enumerate(map):
-        for x, pipe in enumerate(line):
-            if pipe == 'S':
-                start = (x, y)
-                break
-        else:
-            continue
-        break
+map = [line for line in aoc.Input()]
 
-    # walk the path from start until the loop is closed
-    #  try the 4 possible directions
-    for dX, dY, initialdir in ((1, 0, 'WE'), (0, 1, 'NS'), (-1, 0, 'EW'), (0, -1, 'SN')):
-        looplen = 1
+# find the Starting point
+for y, line in enumerate(map):
+    for x, pipe in enumerate(line):
+        if pipe == 'S':
+            start = (x, y)
+            break
+    else:
+        continue
+    break
+
+# walk the path from start until the loop is closed
+#  try the 4 possible directions (3 is enough n fact)
+#  build a clean up map (called loop) while walking with only the necessary pipes
+#  also count loop length
+for direction in ('>', 'v', '<'):
+    try:
         loop = [[' '] * len(map[0]) for _ in range(len(map))]
+        initialdir = direction
+        looplen = 1
         X, Y = start
+        dX, dY = {'>': (1, 0), '<': (-1, 0), 'v': (0, 1)}[direction]
         X += dX
         Y += dY
-        dir = initialdir
         loop[Y][X] = pipe = map[Y][X]
         while (X, Y) != start:
-            if X < 0 or X >= len(loop[0]) or Y < 0 or Y >= len(loop):
-                # this is not a loop, wrong initial direction
-                break
-            match dir, pipe:
-                case 'WE', '-':
-                    X += 1
-                case 'WE', '7':
-                    Y += 1
-                    dir = 'NS'
-                case 'WE', 'J':
-                    Y -= 1
-                    dir = 'SN'
-
-                case 'EW', '-':
-                    X -= 1
-                case 'EW', 'F':
-                    Y += 1
-                    dir = 'NS'
-                case 'EW', 'L':
-                    Y -= 1
-                    dir = 'SN'
-
-                case 'NS', '|':
-                    Y += 1
-                case 'NS', 'J':
-                    X -= 1
-                    dir = 'EW'
-                case 'NS', 'L':
-                    X += 1
-                    dir = 'WE'
-
-                case 'SN', '|':
-                    Y -= 1
-                case 'SN', '7':
-                    X -= 1
-                    dir = 'EW'
-                case 'SN', 'F':
-                    X += 1
-                    dir = 'WE'
-
-                case _:
-                    break
-
+            direction = {'>-': '>', '>7': 'v', '>J': '^',
+                         '<-': '<', '<F': 'v', '<L': '^',
+                         'v|': 'v', 'vJ': '<', 'vL': '>',
+                         '^|': '^', '^7': '<', '^F': '>'}[f'{direction}{pipe}']
+            dX, dY = {'>': (1, 0), '<': (-1, 0), 'v': (0, 1), '^': (0, -1)}[direction]
+            X += dX
+            Y += dY
             if loop[Y][X] != ' ':
-                break
+                raise Exception()
             loop[Y][X] = pipe = map[Y][X]
             looplen += 1
 
         if (X, Y) == start:
             # loop is closed replace pipe at Starting point
-            S = dict(WEWE='-', WENS='L', WESN='F', SNSN='|', NSWE='7', EWNS='J')[f'{initialdir}{dir}']
+            S = {'>>': '-', '>^': 'F', '>v': 'L',
+                 'vv': '|', 'v>': '7', 'v<': 'F',
+                 '<<': '-', '<^': '7', '<v': 'J'}[f'{initialdir}{direction}']
             loop[Y][X] = S
-            return loop, looplen
-
-
-map = [line for line in aoc.Input()]
-loop, looplen = cleanup(map)
+            BREAK
+    except:
+        # this is not a loop
+        continue
 
 
 if args.part == 1:
@@ -93,17 +63,21 @@ if args.part == 1:
 
 if args.part == 2:
     count = 0
+    # traverse the clean up map horizontally at each line
+    # starting outside, switch outside/inside each time a pipe
+    #  with vertical end is encountered (every not empty, not horizontal pipe)
+    # count inside empty cells
     for line in loop:
         inside = 0
         previous = ' '
-        for pipe in line:
-            if pipe == ' ':
+        for cell in line:
+            if cell == ' ':
                 count += inside
                 continue
-            if pipe == '-':
+            if cell == '-':
                 continue
-            if previous + pipe not in ('L7', 'FJ'):
+            if previous + cell not in ('L7', 'FJ'):
                 inside = 1 - inside
-            previous = pipe
+            previous = cell
     print(count)
 # solution: 491
