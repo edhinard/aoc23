@@ -59,7 +59,7 @@ if args.part == 2:
             break
 
     start = platforms[platform]
-    period = cycle - start + 1
+    period = cycle - start + 1 # /!\ added the +1 to get the right result on test vector. don't understand
     end = start + (1000000000 - start) % period
     print(loads[end])
 # solution: 104409
