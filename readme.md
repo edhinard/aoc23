@@ -8,6 +8,7 @@ Almost all of my solutions were reworked afterwards and commented on.
 >>> s="""
 ...       --------Part 1--------   --------Part 2--------
 ... Day       Time   Rank  Score       Time   Rank  Score
+...  20   01:01:34   1643      0   09:16:21   5792      0
 ...  19   00:52:15   3546      0   01:46:01   2163      0
 ...  18   01:54:04   5213      0   01:59:36   2527      0
 ...  17   00:58:49   1471      0   03:33:22   3419      0
@@ -28,8 +29,8 @@ Almost all of my solutions were reworked afterwards and commented on.
 ...   2   00:12:47   2120      0   00:18:10   2323      0
 ...   1   01:03:15  13818      0   01:22:51   8780      0
 ... """
->>> sum(a:=[int((i:=l.split())[2])+int(i[5]) for l in s.splitlines()[3:]])//len(a)
-9156
+>>> {f"Mean {s.split()[6]}":sum(a:=[int((i:=l.split())[2])+int(i[5]) for l in s.splitlines()[3:]])/len(a)}
+{'Mean Rank': 9069.95}
 ```
 
 **Day 1 - Trebuchet** Woke up too late. From now on: wake-up at 5:45.
@@ -62,7 +63,9 @@ Almost all of my solutions were reworked afterwards and commented on.
 
 **Day 18 - Lavaduct Lagoon** After wandering for a long time over a two-dimensional map of the trench, trying to reuse the method of day10, I ended up remembering that we could very simply calculate the area delimited by a closed curve. It still took some time to include the half width of the digger in the calculation with complex solutions at the beginning until the final simplification. In the end the 2nd * came in 5 minutes.
 
-**Day 19 - Aplenty** Wanted a breakfast before going for a walk into the workflow graph.
+**Day 19 - Aplenty** Wanted a breakfast before going for a walk into the workflow graph. Teleworking allow me to keep to finish.
+
+**Day 20 - Pulse Propagation** No telework this day but a little time in the afternoon to craft a dirty specific code that gives the 2nd*. Submitted code is a bit more generic, but no idea how to prove it is the solution.
 
 
 
