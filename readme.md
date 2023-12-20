@@ -56,7 +56,7 @@ Day       Time   Rank  Score       Time   Rank  Score
 
 **Day 17 - Clumsy Crucible** My solution was a complete depth-first graph walk with some heuristic and pruning with help of `bisect`module. Happy to have the 2* at last, but not satisfied with how long it took (6min and 15min), I throw a eye to winning solutions. And learn two main things: 1) the right algorithm is [the Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) 2) the `heapq`module can help.
 
-**Day 18 - LavaductLagoon** After wandering for a long time over a two-dimensional map of the trench, trying to reuse the method of day10, I ended up remembering that we could very simply calculate the area delimited by a closed curve. It still took some time to include the half width of the digger in the calculation with complex solutions when it's so simple. In the end the 2nd * came in 5 minutes.
+**Day 18 - Lavaduct Lagoon** After wandering for a long time over a two-dimensional map of the trench, trying to reuse the method of day10, I ended up remembering that we could very simply calculate the area delimited by a closed curve. It still took some time to include the half width of the digger in the calculation with complex solutions at the beginning until the final simplification. In the end the 2nd * came in 5 minutes.
 
 **Day 19 - Aplenty** Wanted a breakfast before going for a walk into the workflow graph.
 
