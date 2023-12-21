@@ -8,6 +8,7 @@ Almost all of my solutions were reworked afterwards and commented on.
 >>> s="""
 ...       --------Part 1--------   --------Part 2--------
 ... Day       Time   Rank  Score       Time   Rank  Score
+...  21   05:24:22  10319      0   16:40:50   6784      0
 ...  20   01:01:34   1643      0   09:16:21   5792      0
 ...  19   00:52:15   3546      0   01:46:01   2163      0
 ...  18   01:54:04   5213      0   01:59:36   2527      0
@@ -27,10 +28,9 @@ Almost all of my solutions were reworked afterwards and commented on.
 ...   4   00:10:02   3175      0   00:27:40   3877      0
 ...   3   00:26:14   2490      0   00:38:20   2263      0
 ...   2   00:12:47   2120      0   00:18:10   2323      0
-...   1   01:03:15  13818      0   01:22:51   8780      0
-... """
+...   1   01:03:15  13818      0   01:22:51   8780      0"""
 >>> {f"Mean {s.split()[6]}":sum(a:=[int((i:=l.split())[2])+int(i[5]) for l in s.splitlines()[3:]])/len(a)}
-{'Mean Rank': 9069.95}
+{'Mean Rank': 9452.47619047619}
 ```
 
 **Day 1 - Trebuchet** Woke up too late. From now on: wake-up at 5:45.
@@ -67,5 +67,5 @@ Almost all of my solutions were reworked afterwards and commented on.
 
 **Day 20 - Pulse Propagation** No telework this day but a little time in the afternoon to craft a dirty specific code that gives the 2nd*. Submitted code is a bit more generic, but no idea how to prove it is the solution.
 
-**Day 21 - Step Counter** It is time to go in vacation!
+**Day 21 - Step Counter** It is time to go in vacation! First * was so easy. 2nd much less. I'm not sure that keeping my draft scribbles is useful for further understanding.
 
