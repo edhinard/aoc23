@@ -1,18 +1,11 @@
 #! /usr/bin/env python3
 
 import collections
-import dataclasses
-import math
 import re
 
 import aoc
 
 args = aoc.argparse()
-
-@dataclasses.dataclass
-class C:
-    a: int       # 'a' has no default value
-    b: int = 0   # assign a default value for 'b'
 
 if args.part == 1:
     Beam = collections.namedtuple('Beam', 'x y dx dy')
