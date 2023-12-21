@@ -67,5 +67,5 @@ Almost all of my solutions were reworked afterwards and commented on.
 
 **Day 20 - Pulse Propagation** No telework this day but a little time in the afternoon to craft a dirty specific code that gives the 2nd*. Submitted code is a bit more generic, but no idea how to prove it is the solution.
 
-
+**Day 21 - Step Counter** It is time to go in vacation!
 
