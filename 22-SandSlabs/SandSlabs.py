@@ -1,46 +1,48 @@
 #! /usr/bin/env python3
 
 import aoc
+import math
 
 args = aoc.argparse()
 
 class Brick:
+    xmin = ymin = math.inf
+    xmax = ymax = -math.inf
+
     def __init__(self, e1, e2):
         x1, y1, z1 = map(int, e1)
         x2, y2, z2 = map(int, e2)
         self.zlow = min(z1, z2)
-        self.height = max(z1, z2) - self.zlow + 1
-        self.xmin = min(x1, x2)
-        self.xmax = max(x1, x2)
-        self.ymin = min(y1, y2)
-        self.ymax = max(y1, y2)
-        self.map = [(x,y) for x in range(self.xmin, self.xmax + 1) for y in range(self.ymin, self.ymax + 1)]
+        self.zhigh = max(z1, z2)
+        xmin = min(x1, x2) ; Brick.xmin = min(Brick.xmin, xmin)
+        xmax = max(x1, x2) ; Brick.xmax = max(Brick.xmax, xmax)
+        ymin = min(y1, y2) ; Brick.ymin = min(Brick.ymin, ymin)
+        ymax = max(y1, y2) ; Brick.ymax = max(Brick.ymax, ymax)
+        self.map = [(x,y) for x in range(xmin, xmax + 1) for y in range(ymin, ymax + 1)]
         self.supportedby = set()
         self.supports = set()
 
+    def downto(self, z):
+        dz = z - self.zlow
+        assert dz <= 0
+        self.zlow += dz
+        self.zhigh += dz
+
+
 bricks = [Brick(e1.split(','), e2.split(',')) for e1, e2 in aoc.Input(split='~')]
 
-xmin = min(b.xmin for b in bricks)
-xmax = max(b.xmax for b in bricks)
-ymin = min(b.ymin for b in bricks)
-ymax = max(b.ymax for b in bricks)
-ground = Brick((xmin, ymin, 0), (xmax, ymax, 0))
-top = {xy: (0, ground) for xy in ground.map}
+ground = Brick((Brick.xmin, Brick.ymin, 0), (Brick.xmax, Brick.ymax, 0))
+top = {xy: ground for xy in ground.map}
 
-for brick in sorted(bricks, key=lambda b: b.zlow):
-    below = sorted((top[xy] for xy in brick.map), reverse=True, key=lambda zb: zb[0])
-    zsupport = below[0][0]
-    for support in (b for z, b in below if z == zsupport and b != ground):
+for brick in sorted(bricks, key=lambda b:b.zlow):
+    below = sorted((top[xy] for xy in brick.map), reverse=True, key=lambda b:b.zhigh)
+    zsupport = below[0].zhigh
+    for support in (b for b in below if b.zhigh == zsupport and b != ground):
         brick.supportedby.add(support)
         support.supports.add(brick)
-    assert zsupport < brick.zlow
-    brick.zlow = zsupport + 1
-    top.update({xy: (brick.zlow + brick.height - 1, brick) for xy in brick.map})
-#for y in range(ymin, ymax + 1):
-#    for x in range(xmin, xmax + 1):
-#        print(top[(x,y)][0], end=" ")
-#    print()
-#1print()
+    brick.downto(zsupport + 1)
+    top.update({xy: brick for xy in brick.map})
+
 
 if args.part == 1:
     count = 0
@@ -56,5 +58,14 @@ if args.part == 1:
 
 if args.part == 2:
     count = 0
+    for brick in bricks:
+        fallen = set([brick])
+        states = list(brick.supports)
+        while states:
+            state = states.pop(0)
+            states.extend(b for b in state.supports if b not in states)
+            if not (state.supportedby - fallen):
+                fallen.add(state)
+        count += len(fallen) - 1
     print(count)
-# solution: 
+# solution: 60963
