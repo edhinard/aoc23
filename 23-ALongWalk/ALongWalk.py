@@ -38,9 +38,9 @@ if args.part == 1:
         for ndir in '><v^':
             pathxys.append(pathxy + [(nx,ny)])
             pathdirs.append(pathdir + [ndir])
-    print(longesthike)
-        
+    print(longesthike)        
 # solution: 2414
+
 
 if args.part == 2:
     map = [line for line in aoc.Input()]
@@ -49,21 +49,51 @@ if args.part == 2:
     map[0] = '#' * len(map[0])
     ye = len(map) - 1
     xe = map[ye].find('.')
-    longesthike = 0
-    paths = [[(xs, ys+1)]]
-    while paths:
-        path = paths.pop(0)
-        x, y =  path[-1]
-        for dx, dy in ((1,0), (-1,0), (0,-1), (0,1)):
+
+    visited = set()
+    graph = {(xs, ys): [], (xe, ye): []}
+    states = [[(xs, ys), (xs, ys + 1)]]
+    while states:
+        edge = states[0]
+        x, y =  edge[-1]
+        if (x, y) in graph:
+            states.pop(0)
+            graph[edge[0]].append(((x, y), len(edge) - 1))
+            graph[(x, y)].append((edge[0], len(edge) - 1))
+            continue
+        nextcells = []
+        for dx, dy in ((1, 0), (-1, 0), (0, -1), (0, 1)):
             nx = x + dx
             ny = y + dy
-            if (nx,ny) in path or map[ny][nx] == '#':
+            if (nx,ny) in edge or map[ny][nx] == '#' or (x, y) in visited:
                 continue
-            if (nx, ny) == (xe, ye):
-                longesthike = max(longesthike, 1+len(path))
-                print(longesthike)
-                continue
-            paths.append(path + [(nx,ny)])
-    print()
-    print(longesthike)
-# solution: 
+            nextcells.append((nx, ny))
+        if len(nextcells) == 0:
+            states.pop(0)
+            continue
+        if len(nextcells) == 1:
+            visited.add((x, y))
+            edge.append(nextcells[0])
+        else:
+            states.pop(0)
+            states.extend(([(x, y) , nextcell] for nextcell in nextcells))
+            graph[edge[0]].append((edge[-1], len(edge) - 1))
+            graph[(x, y)] = [(edge[0], len(edge) - 1)]
+
+    beforeend, lastlength = graph[(xe, ye)][0]
+    longest = 0
+    states = [[[(xs, ys)], 0]]
+    while states:
+        path, length = states.pop(0)
+        if path[-1] == beforeend:
+            longest = max(longest, length + lastlength)
+            print(longest, len(states))
+            continue
+        for v, l in graph[path[-1]]:
+            if v not in path:
+                states.append((path + [v], length + l))
+    
+        
+    print(longest)
+# solution: 6598 in many hours
+
